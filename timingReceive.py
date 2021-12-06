@@ -54,13 +54,15 @@ class SimpleReceiver(Receiver):
         msg_enc = np.clip(msg_enc, 0, base-1).astype('int')
 
         # Group adjacent numbers based on the base
-        # TODO: This depends on which based is used, e.g. in case of base 2 we need to group 26 adjacecent numbers instead of 2
-        msg_base = []
-        for i in range(0, len(msg_enc) - 1, 2):
-            msg_base.append(str(msg_enc[i]) + str(msg_enc[i+1]))
+        # Compute the max length of a single character in given base
+        max_len = len(np.base_repr(26, base=base))
+        # Convert to array of characters
+        msg_enc_str = msg_enc.astype(str)
+        # Take slices of msg_enc_str with length of max_len
+        msg_base = ["".join(msg_enc_str[i:max_len+i]) for i in range (0, len(msg_enc_str) - 1, max_len)]
 
         # Convert to base 10, then to ascii, then to characters
-        msg_dec = "".join([chr(int(base, 7) + 97) for base in msg_base])
+        msg_dec = "".join([chr(int(msg, base) + 97) for msg in msg_base])
         return msg_dec
 
 
@@ -73,5 +75,6 @@ if __name__ == "__main__":
     print(f"REVEIVED MESSAGE:\t{msg}\n")
     # TODO: Add a bunch of statistics of the intervals
     print(f"STATISTICS OF RECEIVED PINGS\n" +
+          f"Count: {len(intervals)}\n" +
           f"Mean: {np.average(intervals)}\n" + 
           f"Variance: {np.var(intervals)}\n")
