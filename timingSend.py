@@ -11,7 +11,7 @@ class MessageConverter(ABC):
         pass
 
 class SimpleMessageConverter(MessageConverter):
-    def message_to_intervals(self, message: str, base: int, delay: int = 30) -> List[int]:
+    def message_to_intervals(self, message: str, base: int, delay: int = 50) -> List[int]:
         """Converts a message into a set of time intervals. 
         Conversion is done by taking the base 8 ascii value of each character in the message.
         Args:
@@ -63,6 +63,6 @@ class Sender(object):
 if __name__ == "__main__":
     smc = SimpleMessageConverter()
     simple_sender = Sender(smc)
-    message = "AttackAtDawn"
+    message = "test"
     intervals = simple_sender.send_message(message, 7)
     print(intervals) # Print for debugging.
