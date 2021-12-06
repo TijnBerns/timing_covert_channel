@@ -5,35 +5,46 @@ import numpy as np
 import time
 import IPs
 
+
 class MessageConverter(ABC):
     @abstractmethod
     def message_to_intervals(self, message: str) -> List[int]:
         pass
 
+
 class SimpleMessageConverter(MessageConverter):
-    def message_to_intervals(self, message: str, base: int, delay: int = 50) -> List[int]:
+    def message_to_intervals(self, msg: str, base: int, delay: int = 50) -> List[int]:
         """Converts a message into a set of time intervals. 
-        Conversion is done by taking the base 8 ascii value of each character in the message.
+
         Args:
             message (String): The message that is converted to intervals.
         Returns:
-            List: List of integers representing the intervals.
+            List: List of integers representing the intervals in seconds.
         """
         max_len = len(np.base_repr(26, base=base))
-        message = np.array(list(message.lower().replace(" ", ""))) # Convert to lower and remove whitespace
-        message_int = message.view(np.int32) # Convert to ascii
-        message_int = message_int - 97 # Subtract 97 from each ascii value
-        message_base = np.array([np.base_repr(c, base=base) for c in message_int]) # Convert to base
-        message_base = np.array([((max_len - len(c)) * '0') + c for c in message_base]) # Prepend 0 to ensure equal lengths
-        message_intervals_str = np.array([list(s) for s in message_base]).flatten() # Flatten array
-        message_intervals_int = message_intervals_str.astype(np.int) # Convert to int
-
-        return ((message_intervals_int - (base // 2)) * delay) / 1000 + 1
+        
+        # Convert to lower and remove whitespace
+        msg = np.array(list(msg.lower().replace(" ", "")))
+        
+        # Convert to integers
+        msg_int = msg.view(np.int32) - 97 
+        
+        # Convert to specified base
+        msg_base = np.array([np.base_repr(c, base=base) for c in msg_int])  
+        
+        # Prepend 0's to ensure equal lengths
+        msg_base = np.array([((max_len - len(c)) * '0') + c for c in msg_base])
+        
+        # Convert strings to time intervals 
+        intervals_str = np.array([list(s) for s in msg_base]).flatten() 
+        intervals_int = intervals_str.astype(np.int)
+        return ((intervals_int - (base // 2)) * delay) / 1000 + 1
 
 
 class StreamMessageConverter(MessageConverter):
     def message_to_intervals(self, message: str) -> List[int]:
         raise NotImplementedError
+
 
 class Sender(object):
     def __init__(self, message_converter: MessageConverter) -> None:
@@ -66,4 +77,4 @@ if __name__ == "__main__":
     simple_sender = Sender(smc)
     message = "test"
     intervals = simple_sender.send_message(message, 7)
-    print(intervals) # Print for debugging.
+    print(intervals)  # Print for debugging.

@@ -46,20 +46,25 @@ class SimpleReceiver(Receiver):
     def decrypt_message(self, base: int = 7, delay: int = 50) -> str:
         # Get the intervals between pings in ms
         msg_enc = self.get_time_diff_ms() - 1000
+
         # Ronud intervals based on delay
         msg_enc = delay * np.round(msg_enc / delay)
+
         # Convert to different base
         msg_enc = msg_enc / delay + (base // 2)
+
         # Clip to valid range
         msg_enc = np.clip(msg_enc, 0, base-1).astype('int')
 
-        # Group adjacent numbers based on the base
-        # Compute the max length of a single character in given base
-        max_len = len(np.base_repr(26, base=base))
         # Convert to array of characters
         msg_enc_str = msg_enc.astype(str)
+
+        # Compute the max length of a single character in given base
+        max_len = len(np.base_repr(26, base=base))
+
         # Take slices of msg_enc_str with length of max_len
-        msg_base = ["".join(msg_enc_str[i:max_len+i]) for i in range (0, len(msg_enc_str) - 1, max_len)]
+        msg_base = ["".join(msg_enc_str[i:max_len+i])
+                    for i in range(0, len(msg_enc_str) - 1, max_len)]
 
         # Convert to base 10, then to ascii, then to characters
         msg_dec = "".join([chr(int(msg, base) + 97) for msg in msg_base])
@@ -76,5 +81,6 @@ if __name__ == "__main__":
     # TODO: Add a bunch of statistics of the intervals
     print(f"STATISTICS OF RECEIVED PINGS\n" +
           f"Count: {len(intervals)}\n" +
-          f"Mean: {np.average(intervals)}\n" + 
+          f"Total time: {np.sum(intervals)}" +
+          f"Mean: {np.average(intervals)}\n" +
           f"Variance: {np.var(intervals)}\n")
