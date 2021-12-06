@@ -19,12 +19,13 @@ class SimpleMessageConverter(MessageConverter):
         Returns:
             List: List of integers representing the intervals.
         """
+        max_len = len(np.base_repr(26, base=base))
         message = np.array(list(message.lower().replace(" ", ""))) # Convert to lower and remove whitespace
         message_int = message.view(np.int32) # Convert to ascii
         message_int = message_int - 97 # Subtract 97 from each ascii value
-        message_base_7 = np.array([np.base_repr(c, base=base) for c in message_int]) # Convert to base 7
-        message_base_7 = np.array(['0' + c if len(c) == 1 else c for c in message_base_7]) # Prepend 0 in case of len 1
-        message_intervals_str = np.array([list(s) for s in message_base_7]).flatten() # Flatten array
+        message_base = np.array([np.base_repr(c, base=base) for c in message_int]) # Convert to base
+        message_base = np.array([((max_len - len(c)) * '0') + c for c in message_base]) # Prepend 0 to ensure equal lengths
+        message_intervals_str = np.array([list(s) for s in message_base]).flatten() # Flatten array
         message_intervals_int = message_intervals_str.astype(np.int) # Convert to int
 
         return ((message_intervals_int - (base // 2)) * delay) / 1000 + 1
