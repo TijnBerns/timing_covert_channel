@@ -73,14 +73,17 @@ class SimpleReceiver(Receiver):
 
 if __name__ == "__main__":
     sr = SimpleReceiver()
-    sr.sniff_packet()
+    sr.sniff_packet(60)
     msg = sr.decrypt_message()
     intervals = sr.get_time_diff_ms()
 
-    print(f"REVEIVED MESSAGE:\t{msg}\n")
-    # TODO: Add a bunch of statistics of the intervals
-    print(f"STATISTICS OF RECEIVED PINGS\n" +
-          f"Count: {len(intervals)}\n" +
-          f"Total time: {np.sum(intervals)}" +
-          f"Mean: {np.average(intervals)}\n" +
-          f"Variance: {np.var(intervals)}\n")
+    if len(intervals) > 0:
+        print(f"REVEIVED MESSAGE: {msg}\n")
+
+        print(f"STATISTICS OF RECEIVED PINGS\n" +
+              f"Count: {len(intervals)}\n" +
+              f"Total time: {np.sum(intervals)}\n" +
+              f"Min interval: {np.min(intervals)}\n" +
+              f"Max interval: {np.max(intervals)}\n"
+              f"Mean: {np.average(intervals)}\n" +
+              f"Variance: {np.var(intervals)}\n")
