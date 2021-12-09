@@ -5,15 +5,13 @@ import numpy as np
 import time
 import IPs
 
-
 class MessageConverter(ABC):
     @abstractmethod
     def message_to_intervals(self, message: str) -> List[int]:
         pass
 
-
 class SimpleMessageConverter(MessageConverter):
-    def message_to_intervals(self, msg: str, base: int, delay: int = 50) -> List[int]:
+    def message_to_intervals(self, msg: str, base: int, delay: int = 20) -> List[int]:
         """Converts a message into a set of time intervals. 
 
         Args:
@@ -27,7 +25,7 @@ class SimpleMessageConverter(MessageConverter):
         msg = np.array(list(msg.lower().replace(" ", "")))
         
         # Convert to integers
-        msg_int = msg.view(np.int32) - 97 
+        msg_int = msg.view(np.int32) - 97
         
         # Convert to specified base
         msg_base = np.array([np.base_repr(c, base=base) for c in msg_int])  
@@ -38,13 +36,18 @@ class SimpleMessageConverter(MessageConverter):
         # Convert strings to time intervals 
         intervals_str = np.array([list(s) for s in msg_base]).flatten() 
         intervals_int = intervals_str.astype(np.int)
-        return ((intervals_int - (base // 2)) * delay) / 1000 + 1
 
+        print(intervals_int)
+
+        # In case of an even base, evenly distribute the intervals around 1.
+        if (base % 2 == 1):
+            return ((intervals_int - (base // 2)) * delay) / 1000 + 1
+        else:
+            return ((intervals_int - (base // 2)) * delay) / 1000 + 1 + delay / 2000
 
 class StreamMessageConverter(MessageConverter):
     def message_to_intervals(self, message: str) -> List[int]:
         raise NotImplementedError
-
 
 class Sender(object):
     def __init__(self, message_converter: MessageConverter) -> None:
@@ -71,10 +74,9 @@ class Sender(object):
         s.close()
         return intervals
 
-
 if __name__ == "__main__":
     smc = SimpleMessageConverter()
     simple_sender = Sender(smc)
-    message = "test"
-    intervals = simple_sender.send_message(message, 7)
+    message = "testberichtditis"
+    intervals = simple_sender.send_message(message, 2)
     print(intervals)  # Print for debugging.
