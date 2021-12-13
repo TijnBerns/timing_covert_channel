@@ -5,7 +5,6 @@ import numpy as np
 import IPs
 from args import parser
 
-
 class Receiver(ABC):
     def __init__(self) -> None:
         super().__init__()
@@ -39,7 +38,6 @@ class Receiver(ABC):
     @abstractmethod
     def decrypt_message(self, base, delay) -> str:
         pass
-
 
 class SimpleReceiver(Receiver):
     def __init__(self) -> None:

@@ -6,7 +6,6 @@ import time
 import IPs
 from args import parser
 
-
 class MessageConverter(ABC):
     def message_to_intervals(self, msg: str, base: int) -> List[int]:
         """Converts a message into a set of time intervals. 
@@ -23,7 +22,6 @@ class MessageConverter(ABC):
 
         # Convert to integers
         msg_int = msg.view(np.int32) - 97
-
         # Convert to specified base
         msg_base = np.array([np.base_repr(c, base=base) for c in msg_int])
 
@@ -46,8 +44,11 @@ class SimpleMessageConverter(MessageConverter):
             List: List of integers representing the intervals in seconds.
         """
         intervals_int = super().message_to_intervals(msg, base)
-        return ((intervals_int - (base // 2)) * delay) / 1000 + 1
-
+        # In case of an even base, evenly distribute the intervals around 1.
+        if (base % 2 == 1):
+            return ((intervals_int - (base // 2)) * delay) / 1000 + 1
+        else:
+            return ((intervals_int - (base // 2)) * delay) / 1000 + 1 + delay / 2000
 
 class NoIntervalMessageConverter(MessageConverter):
     def message_to_intervals(self, msg: str, base: int, delay: int) -> List[int]:
@@ -61,7 +62,6 @@ class NoIntervalMessageConverter(MessageConverter):
         """
         intervals_int = super().message_to_intervals(msg, base)
         return (intervals_int + 1) * delay / 1000
-
 
 class Sender(object):
     def __init__(self, message_converter: MessageConverter) -> None:
@@ -87,7 +87,6 @@ class Sender(object):
             s.send(frame)
         s.close()
         return intervals
-
 
 if __name__ == "__main__":
     args = parser()
