@@ -5,6 +5,7 @@ import numpy as np
 import time
 import IPs
 from args import parser
+import re
 
 class MessageConverter(ABC):
     def message_to_intervals(self, msg: str, base: int) -> List[int]:
@@ -17,8 +18,9 @@ class MessageConverter(ABC):
         """
         max_len = len(np.base_repr(26, base=base))
 
-        # Convert to lower and remove whitespace
-        msg = np.array(list(msg.lower().replace(" ", "")))
+        # Convert to lower and keep only ASCII characters in range a-z
+        regex = re.compile('[^a-z]')
+        msg = np.array(list(regex.sub('', msg.lower())))
 
         # Convert to integers
         msg_int = msg.view(np.int32) - 97
