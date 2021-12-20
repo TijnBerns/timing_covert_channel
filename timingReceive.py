@@ -11,7 +11,7 @@ class Receiver(ABC):
         self.timings = []
 
     def sniff_packet(self, timeout: int = 15) -> None:
-        """Sniffs ping packets for 'timeout' seconds.
+        """Sniffs ping packets for 'timeout' seconds
 
         Args:
             timeout (int, optional): Time the network is sniffed (s). Defaults to 15.
@@ -20,10 +20,10 @@ class Receiver(ABC):
               prn=self.__handle_packet, store=False, quiet=True, iface="enp3s0", timeout=timeout)
 
     def get_time_diff_ms(self) -> np.array(float):
-        """Computes the timing difference between each pair of sequentially received ping packets.
+        """Computes the timing difference between each pair of sequentially received ping packets
 
         Returns:
-            np.array(float): Numpy array containing the time difference between all received ping packets.
+            np.array(float): Numpy array containing the time difference between all received ping packets
         """
         message_intervals_ms = []
         for i in range(len(self.timings) - 1):
@@ -125,14 +125,14 @@ if __name__ == "__main__":
 
     # Print info
     if len(intervals) > 0:
-        print(f"RECEIVED INTERVALS (ms):\n{intervals}\n")
+        print(f"Received intervals (ms):\n{intervals}\n")
 
-        print(f"RECEIVED MESSAGE:\n{msg}\n")
+        print(f"Decoded message:\n{msg}\n")
 
-        print(f"STATISTICS OF RECEIVED PINGS\n" +
+        print(f"Statistics:\n" +
               f"Count: {len(intervals)}\n" +
-              f"Total time: {np.sum(intervals)}\n" +
-              f"Min interval: {np.min(intervals)}\n" +
-              f"Max interval: {np.max(intervals)}\n"
+              f"Total time: {np.sum(intervals) / 1000} (s)\n" +
+              f"Min interval: {np.min(intervals)} (ms)\n" +
+              f"Max interval: {np.max(intervals)} (ms)\n"
               f"Mean: {np.average(intervals)}\n" +
               f"Variance: {np.var(intervals)}\n")

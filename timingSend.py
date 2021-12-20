@@ -5,7 +5,7 @@ import numpy as np
 import time
 import IPs
 from args import parser
-import re
+
 
 class MessageConverter(ABC):
     def message_to_intervals(self, msg: str, base: int) -> List[int]:
@@ -18,12 +18,12 @@ class MessageConverter(ABC):
         """
         max_len = len(np.base_repr(26, base=base))
 
-        # Convert to lower and keep only ASCII characters in range a-z
-        regex = re.compile('[^a-z]')
-        msg = np.array(list(regex.sub('', msg.lower())))
+        # Convert to lower and non alphanumeric characters
+        msg = np.array(list(''.join(filter(str.isalnum, msg.lower()))))
 
         # Convert to integers
         msg_int = msg.view(np.int32) - 97
+
         # Convert to specified base
         msg_base = np.array([np.base_repr(c, base=base) for c in msg_int])
 
@@ -52,6 +52,7 @@ class SimpleMessageConverter(MessageConverter):
         else:
             return ((intervals_int - (base // 2)) * delay) / 1000 + 1 + delay / 2000
 
+
 class NoIntervalMessageConverter(MessageConverter):
     def message_to_intervals(self, msg: str, base: int, delay: int) -> List[int]:
         """Converts a message into a set of time intervals.
@@ -64,6 +65,7 @@ class NoIntervalMessageConverter(MessageConverter):
         """
         intervals_int = super().message_to_intervals(msg, base)
         return (intervals_int + 1) * delay / 1000
+
 
 class Sender(object):
     def __init__(self, message_converter: MessageConverter) -> None:
@@ -90,6 +92,7 @@ class Sender(object):
         s.close()
         return intervals
 
+
 if __name__ == "__main__":
     args = parser()
 
@@ -101,11 +104,14 @@ if __name__ == "__main__":
     else:
         raise NotImplementedError
 
-    # Send message
+    # Print info
     simple_sender = Sender(mc)
     message = args.msg
+    intervals = mc.message_to_intervals(message, args.base, args.delay)
+    print(f"Message: {message}\n\n" +
+          f"Expected time: {round(np.sum(intervals), 2)} sec\n\n" +
+          f"Ping at intervals (ms):\n{intervals * 1000}\n\n")
+
+    # Send message
     intervals = simple_sender.send_message(message, args.base, args.delay)
 
-    # Print info
-    print(f"Message: {message}\n" +
-          f"Ping at intervals (ms): {intervals * 1000}")
